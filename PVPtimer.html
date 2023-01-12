@@ -1,0 +1,117 @@
+<!-- ***** TO DO / WISHLIST *****
+***** END TO DO / WISHLIST ***** -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="refresh" content="900" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PVP Timer</title>
+    <style>
+      body {
+        padding-left: 15px;
+        font-family: "Trebuchet MS", sans-serif;
+        background-color: black;
+      }
+      #wrapper {
+        width: 800px;
+        background-color: black;
+        margin: 0 auto;
+      }
+      span {
+        color: red;
+        font-family: "SevenSegment", monospace;
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <!-- ***START*** VIEW TIMER  -->
+      <div
+        style="
+          background-color: black;
+          color: white;
+          text-align: center;
+          font-size: 150px;
+        "
+      >
+        <p>
+          <span id="pvptestmm"></span><span>:</span><span id="pvptestss"></span>
+        </p>
+      </div>
+      <!-- ***END*** VIEW TIMER -->
+
+      <script>
+        // ***** UPDATE THESE VALUES TO SUIT YOUR SETUP *******
+        var ipAddressOfPVPComputer = "172.20.10.53"; // IP Address of PVP computer (See Network Preferences)
+        var networkPortOfPVP = "8080"; // Port number PVP (See Network Preferences)
+        var layerId = "0"; // PVP Layer ID
+        // ****************************************************
+
+        // **** SCRIPT SHOW PVP LAYER TIMER REMAINING****
+        function getStatusPVP() {
+          const apiRequest = new XMLHttpRequest();
+
+          apiRequest.onload = function () {
+            if (this.status === 200) {
+              try {
+                const data = JSON.parse(this.responseText);
+
+                // **** REMAINING TIME IN SPLIT IN MINUTES ****
+                document.getElementById("pvptestmm").innerHTML = Math.floor(
+                  data.transportState.timeRemaining / 60
+                )
+                  .toFixed(0)
+                  .padStart(2, "0");
+                // **** REMAINING TIME IN SPLIT IN SECONDS ****
+                document.getElementById("pvptestss").innerHTML = Math.floor(
+                  data.transportState.timeRemaining % 60
+                )
+                  .toFixed(0)
+                  .padStart(2, "0");
+                // **** CONSOLE LOG REMAINING TIME IN SPLIT IN MINUTES ****
+                console
+                  .log(
+                    "Video timer remaining mm: " +
+                      Math.floor(data.transportState.timeRemaining / 60)
+                  )
+                  .toFixed(0)
+                  .padStart(2, "0");
+                // **** CONSOLE LOG REMAINING TIME IN SPLIT IN SECONDS ****
+                console
+                  .log(
+                    "Video timer remaining ss: " +
+                      Math.floor(data.transportState.timeRemaining % 60)
+                  )
+                  .toFixed(0)
+                  .padStart(2, "0");
+              } catch (e) {
+                console.warn(
+                  "There was an error in the JSON. Could not parse!"
+                );
+              }
+            } else {
+              console.warn("Did not receive 200 OK from respones!");
+            }
+          };
+          apiRequest.open(
+            "GET",
+            "http://" +
+              ipAddressOfPVPComputer +
+              ":" +
+              networkPortOfPVP +
+              "/api/0/transportState/layer/" +
+              layerId
+          );
+          apiRequest.send();
+        }
+
+        window.setInterval(getStatusPVP, 1000);
+        // ****************************************************************
+      </script>
+    </div>
+  </body>
+</html>
